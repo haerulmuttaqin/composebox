@@ -1,103 +1,110 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import React, { useState } from 'react';
+import CodeEditor from './components/Editor';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function HomePage() {
+
+    const initialCode = `import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.renderComposable
+
+fun main() {
+    renderComposable(rootElementId = "root") {
+        Div {
+            Text("Hello from Compose Playground!")
+            P { Text("Start coding here..." ) }
+        }
+    }
+}
+`;
+
+    const [code, setCode] = useState<string>(initialCode);
+    const [previewContent, setPreviewContent] = useState<string>('Rendered UI will appear here.');
+    const [iframeKey, setIframeKey] = useState<number>(0); // Untuk force reload iframe
+
+    const handleCodeChange = (value: string | undefined) => {
+        setCode(value || '');
+        // Nantinya di sini kita akan trigger kompilasi ke backend
+        // Untuk MVP, kita bisa biarkan kosong dulu atau log perubahannya
+        console.log("Code changed:", value);
+    };
+
+    const compileAndRunCode = async () => {
+        setPreviewContent('Compiling code...');
+        try {
+            const response = await fetch('/api/compile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code }),
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                setPreviewContent('Error: ' + (err.error || 'Failed to compile'));
+                return;
+            }
+            const result = await response.json();
+            if (result.url) {
+                setPreviewContent(result.url);
+                setIframeKey(prev => prev + 1);
+            } else {
+                setPreviewContent('No HTML output from backend.');
+            }
+        } catch (e: any) {
+            setPreviewContent('Error: ' + e.message);
+        }
+    };
+
+    return (
+        <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
+            <header style={{ padding: '10px 20px', borderBottom: '1px solid #333', backgroundColor: '#282c34', color: 'white' }}>
+                <h1>Compose Playground</h1>
+            </header>
+            <div style={{ display: 'flex', flexGrow: 1 }}>
+                <div style={{ flex: 1, borderRight: '1px solid #333', display: 'flex', flexDirection: 'column' }}>
+                    <CodeEditor code={code} onChange={handleCodeChange} />
+                    <button
+                        onClick={compileAndRunCode}
+                        style={{
+                            padding: '10px 20px',
+                            margin: '10px',
+                            backgroundColor: '#61dafb',
+                            color: 'black',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                        }}
+                    >
+                        Run Code
+                    </button>
+                </div>
+                <div style={{ flex: 1, padding: '20px', backgroundColor: '#282c34', color: 'white', overflow: 'auto' }}>
+                    <h2>Live Preview</h2>
+                    {/* Tampilkan hasil kompilasi Compose Web di iframe */}
+                    <div
+                        style={{
+                            border: '1px solid #61dafb',
+                            minHeight: '400px',
+                            backgroundColor: 'white',
+                            color: 'black',
+                            padding: '10px',
+                            overflow: 'auto',
+                        }}
+                    >
+                        {previewContent.startsWith('/compose-output') ? (
+                            <iframe
+                                key={iframeKey}
+                                src={previewContent}
+                                style={{ width: '100%', height: '400px', border: 'none', background: 'white' }}
+                                sandbox="allow-scripts allow-same-origin"
+                                title="Compose Web Preview"
+                            />
+                        ) : (
+                            <div>{previewContent}</div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
