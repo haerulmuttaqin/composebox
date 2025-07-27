@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
         if (!sessionId) {
             sessionId = crypto.randomBytes(8).toString('hex');
         }
+        console.log('API received session ID:', sessionId);
         const sessionOutputDir = path.join(process.cwd(), 'public', 'compose-output', sessionId);
 
         // 1. Overwrite Main.kt

@@ -1,75 +1,129 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import CodeEditor from './components/Editor';
+import Header from './components/Header';
+import ProgressIndicator from './components/ProgressIndicator';
+import Resizer from './components/Resizer';
+import PreviewModeSelector from './components/PreviewModeSelector';
+import ErrorDisplay from './components/ErrorDisplay';
+import MobilePreview from './components/MobilePreview';
+import DesktopPreview from './components/DesktopPreview';
+import { DEFAULT_COMPOSE_CODE } from './data/templates';
 
 export default function HomePage() {
-    const initialCode = `package org.example.project
-
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-
-import compose_compiler.composeapp.generated.resources.Res
-import compose_compiler.composeapp.generated.resources.compose_multiplatform
-
-@Composable
-fun App() {
-    MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
-        }
-    }
-}
-`;
+    const initialCode = DEFAULT_COMPOSE_CODE;
 
     const [code, setCode] = useState<string>(initialCode);
     const [iframeKey, setIframeKey] = useState<number>(0);
     const [isCompiling, setIsCompiling] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string>('/compose-output/index.html');
+    const [errorDetail, setErrorDetail] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string>('');
     const [buildProgress, setBuildProgress] = useState<string>('');
     const [buildStep, setBuildStep] = useState<number>(0);
+    const [editorWidth, setEditorWidth] = useState<number>(50); // percentage
+    const [isResizing, setIsResizing] = useState<boolean>(false);
+    const [iframeError, setIframeError] = useState<boolean>(false);
+    const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Generate or get session ID for localStorage
+    const getSessionId = () => {
+        let sessionId = localStorage.getItem('composebox-session-id');
+        if (!sessionId) {
+            sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('composebox-session-id', sessionId);
+        }
+        console.log('Current session ID:', sessionId);
+        return sessionId;
+    };
+
+    // Load saved code from localStorage on component mount
+    useEffect(() => {
+        const sessionId = getSessionId();
+        const savedCode = localStorage.getItem(`composebox-saved-code-${sessionId}`);
+        if (savedCode) {
+            setCode(savedCode);
+        }
+    }, []);
+
+    // Auto-save code to localStorage
+    useEffect(() => {
+        const sessionId = getSessionId();
+        localStorage.setItem(`composebox-saved-code-${sessionId}`, code);
+    }, [code]);
+
+    // Keyboard shortcut handler
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault(); // Prevent default save behavior
+                if (!isCompiling) {
+                    compileAndRunCode();
+                }
+            }
+        };
+
+        // Add event listener
+        document.addEventListener('keydown', handleKeyDown);
+
+        // Cleanup
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isCompiling]); // Re-run when isCompiling changes
 
     const handleCodeChange = (value: string | undefined) => {
         setCode(value || '');
     };
 
+    const handleMouseDown = (e: React.MouseEvent) => {
+        setIsResizing(true);
+        e.preventDefault();
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+        if (!isResizing || !containerRef.current) return;
+
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+        // Limit resize between 20% and 80%
+        if (newWidth >= 20 && newWidth <= 80) {
+            setEditorWidth(newWidth);
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsResizing(false);
+    };
+
+    useEffect(() => {
+        if (isResizing) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+
+            return () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+        }
+    }, [isResizing]);
+
     const compileAndRunCode = async () => {
         setIsCompiling(true);
         setError(null);
+        setErrorDetail(null); // Clear previous error details
+        setIframeError(false); // Reset iframe error when compiling
         setBuildStep(0);
         setBuildProgress('Preparing build...');
-        
+
         try {
             setBuildStep(1);
             setBuildProgress('Compiling Kotlin code...');
-            
+
             // Simulate progress during compilation
             const progressInterval = setInterval(() => {
                 setBuildStep(prev => {
@@ -77,22 +131,24 @@ fun App() {
                     return prev;
                 });
             }, 1000);
-            
+
             const response = await fetch('/api/compile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // Include cookies for session management
                 body: JSON.stringify({ code: code }),
             });
-            
+
             clearInterval(progressInterval);
-            
+
             if (!response.ok) {
                 const err = await response.json();
                 setError(err.error || 'Failed to compile');
+                setErrorDetail(err.detail || null); // Store detail error
             } else {
                 setBuildStep(2);
                 setBuildProgress('Building WASM...');
-                
+
                 // Simulate WASM build progress
                 const wasmProgressInterval = setInterval(() => {
                     setBuildStep(prev => {
@@ -100,23 +156,23 @@ fun App() {
                         return prev;
                     });
                 }, 800);
-                
+
                 const result = await response.json();
-                
+
                 clearInterval(wasmProgressInterval);
-                
+
                 if (result.url) {
                     setBuildStep(3);
                     setBuildProgress('Copying files...');
-                    
+
                     // Simulate file copying
                     setTimeout(() => {
                         setBuildStep(4);
                         setBuildProgress('Build completed!');
-                        
+
                         setPreviewUrl(result.url); // Set URL unik dari backend
                         setIframeKey(prev => prev + 1);
-                        
+
                         // Clear progress after 2 seconds
                         setTimeout(() => {
                             setBuildProgress('');
@@ -132,151 +188,111 @@ fun App() {
         }
     };
 
-    const getProgressPercentage = () => {
-        if (buildStep === 0) return 0;
-        if (buildStep <= 1) return Math.min(buildStep * 25, 25);
-        if (buildStep <= 2) return 25 + Math.min((buildStep - 1) * 35, 35);
-        if (buildStep <= 3) return 60 + Math.min((buildStep - 2) * 25, 25);
-        if (buildStep <= 4) return 85 + Math.min((buildStep - 3) * 15, 15);
-        return 100;
+    const handleIframeError = () => {
+        setIframeError(true);
+    };
+
+    const handleIframeLoad = () => {
+        setIframeError(false);
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            <header style={{ 
-                padding: '10px 20px', 
-                borderBottom: '1px solid #333', 
-                backgroundColor: '#282c34', 
-                color: 'white',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-            }}>
-                <h1>Compose Playground (WASM)</h1>
-                <button
-                    onClick={compileAndRunCode}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        background: isCompiling ? '#bdbdbd' : '#fff',
-                        border: 'none',
-                        borderRadius: '20px',
-                        padding: '6px 16px 6px 10px',
-                        fontWeight: 600,
-                        color: isCompiling ? '#888' : '#222',
-                        cursor: isCompiling ? 'not-allowed' : 'pointer',
-                        fontSize: '15px',
-                        boxShadow: isCompiling ? 'none' : '0 1px 4px rgba(0,0,0,0.04)',
-                        transition: 'background 0.2s',
-                        outline: 'none',
-                    }}
-                    disabled={isCompiling}
+        <div className="flex flex-col h-screen">
+            <Header isCompiling={isCompiling} onRunCode={compileAndRunCode} />
+            
+            <div
+                ref={containerRef}
+                className={`flex flex-1 ${isResizing ? 'cursor-col-resize select-none' : 'cursor-default select-auto'}`}
+            >
+                {/* Editor Panel */}
+                <div 
+                    className="flex flex-col min-w-[200px] border-r border-border-color"
+                    style={{ width: `${editorWidth}%` }}
                 >
-                    {isCompiling ? (
-                        <span style={{ display: 'flex', alignItems: 'center' }}>
-                            <span style={{
-                                width: '16px',
-                                height: '16px',
-                                border: '2px solid #bdbdbd',
-                                borderTop: '2px solid #4CAF50',
-                                borderRadius: '50%',
-                                animation: 'spin 1s linear infinite',
-                                marginRight: '6px',
-                            }} />
-                            Building...
-                        </span>
-                    ) : (
-                        <>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z" fill="#4CAF50"/>
-                            </svg>
-                            Run
-                        </>
-                    )}
-                </button>
-            </header>
-            <div style={{ display: 'flex', flexGrow: 1 }}>
-                <div style={{ flex: 1, borderRight: '1px solid #333', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ flex: 1, paddingBottom: '32px' }}>
-                            <CodeEditor code={code} onChange={handleCodeChange} />
-                        </div>
-                        {/* Loading Indicator with Progress Bar - Absolute at bottom of editor */}
-                        {isCompiling && (
-                            <div style={{ 
-                                position: 'absolute', 
-                                left: 0, 
-                                right: 0, 
-                                bottom: 0, 
-                                padding: '8px 10px 0 10px', 
-                                backgroundColor: 'transparent', 
-                                borderTop: 'none',
-                                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                                width: '100%',
-                                zIndex: 2
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-                                    <div style={{ 
-                                        width: '12px', 
-                                        height: '12px', 
-                                        border: '1.5px solid rgba(255,255,255,0.3)', 
-                                        borderTop: '2px solid #61dafb', 
-                                        borderRadius: '50%', 
-                                        animation: 'spin 1s linear infinite',
-                                        marginRight: '6px'
-                                    }}></div>
-                                    <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>{buildProgress}</span>
-                                </div>
-                                <div style={{ 
-                                    width: '100%', 
-                                    height: '2px', 
-                                    backgroundColor: 'rgba(255,255,255,0.1)', 
-                                    borderRadius: '1px',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{ 
-                                        width: `${getProgressPercentage()}%`, 
-                                        height: '100%', 
-                                        backgroundColor: '#61dafb', 
-                                        transition: 'width 0.3s ease',
-                                        borderRadius: '1px'
-                                    }}></div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    {error && <div style={{ color: 'red', margin: '10px' }}>Error: {error}</div>}
-                </div>
-                <div style={{ flex: 1, padding: '20px', backgroundColor: '#282c34', color: 'white', overflow: 'auto' }}>
-                    <h2>Live Preview</h2>
-                    <div
-                        style={{
-                            border: '1px solid #61dafb',
-                            minHeight: '400px',
-                            backgroundColor: 'white',
-                            color: 'black',
-                            padding: '10px',
-                            overflow: 'auto',
-                        }}
-                    >
-                        <iframe
-                            key={iframeKey}
-                            src={previewUrl} // Use dynamic URL
-                            style={{ width: '100%', height: '400px', border: 'none', background: 'white' }}
-                            sandbox="allow-scripts allow-same-origin"
-                            title="Compose WASM Preview"
+                    <div className="relative flex-1 flex flex-col">
+                        <CodeEditor code={code} onChange={handleCodeChange} />
+                        <ProgressIndicator 
+                            isCompiling={isCompiling}
+                            buildProgress={buildProgress}
+                            buildStep={buildStep}
                         />
+                    </div>
+                    {error && (
+                        <div className="text-red-500 m-2.5">
+                            Error: {error}
+                            {errorDetail && <div className="text-xs text-red-200 mt-1">Detail: {errorDetail}</div>}
+                        </div>
+                    )}
+                </div>
+
+                {/* Resizer */}
+                <Resizer onMouseDown={handleMouseDown} isResizing={isResizing} />
+
+                {/* Preview Panel */}
+                <div className="flex-1 p-5 bg-zinc-800 text-white overflow-auto min-w-[200px]">
+                    <PreviewModeSelector 
+                        previewMode={previewMode} 
+                        onModeChange={setPreviewMode} 
+                    />
+
+                    <div className="min-h-[400px] text-black p-2.5 overflow-auto">
+                        {error ? (
+                            <ErrorDisplay 
+                                error={error}
+                                errorDetail={errorDetail}
+                                isCompiling={isCompiling}
+                                onTryAgain={compileAndRunCode}
+                            />
+                        ) : iframeError || previewUrl === '' ? (
+                            previewMode === 'mobile' ? (
+                                <MobilePreview
+                                    previewUrl={previewUrl}
+                                    iframeKey={iframeKey}
+                                    isCompiling={isCompiling}
+                                    buildProgress={buildProgress}
+                                    buildStep={buildStep}
+                                    onRunCode={compileAndRunCode}
+                                    onIframeError={handleIframeError}
+                                    onIframeLoad={handleIframeLoad}
+                                />
+                            ) : (
+                                <DesktopPreview
+                                    previewUrl={previewUrl}
+                                    iframeKey={iframeKey}
+                                    isCompiling={isCompiling}
+                                    buildProgress={buildProgress}
+                                    buildStep={buildStep}
+                                    onRunCode={compileAndRunCode}
+                                    onIframeError={handleIframeError}
+                                    onIframeLoad={handleIframeLoad}
+                                />
+                            )
+                        ) : previewMode === 'mobile' ? (
+                            <MobilePreview
+                                previewUrl={previewUrl}
+                                iframeKey={iframeKey}
+                                isCompiling={isCompiling}
+                                buildProgress={buildProgress}
+                                buildStep={buildStep}
+                                onRunCode={compileAndRunCode}
+                                onIframeError={handleIframeError}
+                                onIframeLoad={handleIframeLoad}
+                            />
+                        ) : (
+                            <DesktopPreview
+                                previewUrl={previewUrl}
+                                iframeKey={iframeKey}
+                                isCompiling={isCompiling}
+                                buildProgress={buildProgress}
+                                buildStep={buildStep}
+                                onRunCode={compileAndRunCode}
+                                onIframeError={handleIframeError}
+                                onIframeLoad={handleIframeLoad}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
-            
-            <style jsx>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `}</style>
         </div>
     );
-}
+} 

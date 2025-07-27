@@ -1,4 +1,4 @@
-package org.example.project
+export const DEFAULT_COMPOSE_CODE = `package org.example.project
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -26,10 +26,8 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { showContent = !showContent }) {
-                Text("Click me loaded!")
+            Button(onClick = { showContent = !showContent }) {
+                Text("Click me!")
             }
             AnimatedVisibility(showContent) {
                 val greeting = remember { Greeting().greet() }
@@ -41,3 +39,13 @@ fun App() {
         }
     }
 }
+`;
+
+// Template untuk contoh kode lainnya (bisa ditambahkan di masa depan)
+export const CODE_TEMPLATES = {
+    default: DEFAULT_COMPOSE_CODE,
+    // Tambahkan template lain di sini jika diperlukan
+    // simple: `...`,
+    // counter: `...`,
+    // list: `...`,
+}; 
