@@ -101,7 +101,7 @@ const MobilePreview: React.FC<MobilePreviewProps> = ({
                                 className="w-full h-full border-none bg-white"
                                 sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups allow-downloads"
                                 title="Compose WASM Preview"
-                                onError={(e) => {
+                                onError={() => {
                                     setIsIframeLoading(false);
                                     onIframeError();
                                 }}

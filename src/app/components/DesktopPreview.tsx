@@ -84,7 +84,7 @@ const DesktopPreview: React.FC<DesktopPreviewProps> = ({
                                 className="w-full h-full border-none bg-white"
                                 sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups allow-downloads"
                                 title="Compose WASM Preview"
-                                onError={(e) => {
+                                onError={() => {
                                     setIsIframeLoading(false);
                                     onIframeError();
                                 }}
