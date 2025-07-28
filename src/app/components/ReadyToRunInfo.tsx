@@ -34,12 +34,12 @@ const ReadyToRunInfo: React.FC<ReadyToRunInfoProps> = ({
                 {isCompiling ? 'Compiling...' : 'Ready to Run'}
             </h3>
             <p className="text-gray-600 m-0 mb-5 text-sm max-w-[280px]">
-                {isCompiling 
+                {isCompiling
                     ? 'Please wait while your code is being compiled...'
                     : 'Click the "Run Code" button in the header to compile and see your Compose UI in action.'
                 }
             </p>
-            
+
             {/* Progress indicator saat compiling */}
             {isCompiling && (
                 <div className="w-full max-w-[280px] mb-5">
@@ -48,33 +48,35 @@ const ReadyToRunInfo: React.FC<ReadyToRunInfoProps> = ({
                         <span className="text-sm text-blue-600">{buildProgress}</span>
                     </div>
                     <div className="w-full h-0.5 bg-blue-200 rounded-sm overflow-hidden">
-                        <div 
+                        <div
                             className="h-full bg-blue-500 transition-all duration-300 ease-in-out rounded-sm"
                             style={{ width: `${getProgressPercentage()}%` }}
                         ></div>
                     </div>
                 </div>
             )}
-            
+
             <button
                 onClick={onRunCode}
-                className={`flex items-center gap-2 rounded-full px-5 py-2.5 font-semibold text-white text-sm shadow-md transition-colors duration-200 ${
-                    isCompiling 
-                        ? 'bg-gray-400 cursor-not-allowed' 
+                className={`flex items-center gap-2 rounded-full pl-2 pr-4 py-1 font-semibold text-white text-sm shadow-md transition-colors duration-200 ${isCompiling
+                        ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-green-500 cursor-pointer hover:bg-green-600'
-                }`}
+                    }`}
                 disabled={isCompiling}
                 title="Run Code (Ctrl+S / Cmd+S)"
             >
                 {isCompiling ? (
                     <>
+                        <svg width="1" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z" fill="#FFFFFF" />
+                        </svg>
                         <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Compiling...
                     </>
                 ) : (
                     <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z" fill="white" />
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z" fill="#FFFFFF" />
                         </svg>
                         Run Code
                     </>

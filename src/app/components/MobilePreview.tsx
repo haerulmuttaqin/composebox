@@ -33,7 +33,7 @@ const MobilePreview: React.FC<MobilePreviewProps> = ({
     }, [previewUrl, isReadyToRun]);
 
     return (
-        <div className="flex justify-center items-center h-[calc(100vh-200px)] min-h-[400px] p-5">
+        <div className="flex justify-center items-center h-full min-h-[400px] p-5">
             <div className="relative w-[375px] h-[667px] bg-zinc-700 rounded-4xl p-2 shadow-2xl border border-border-color">
                 {/* Device Frame - Notch */}
                 <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-15 h-1 bg-gray-600 rounded-sm z-10" />
