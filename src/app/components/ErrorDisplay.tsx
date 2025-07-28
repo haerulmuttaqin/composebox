@@ -32,7 +32,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
                 Compilation Error
             </h3>
             <p className="text-gray-600 m-0 mb-4 text-sm max-w-md">
-                Your code couldn't be compiled. Please check the error details below and fix the issues.
+                Your code couldn&apos;t be compiled. Please check the error details below and fix the issues.
             </p>
             <div className="bg-white border border-red-200 rounded-md p-4 font-mono text-sm text-red-700 text-left max-w-full w-full max-h-[400px] overflow-auto whitespace-pre-wrap break-words leading-relaxed">
                 <div className="mb-2 font-semibold border-b border-red-200 pb-1">
@@ -62,7 +62,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
                     Try Again
                 </button>
                 <span className="text-xs text-gray-600">
-                    Fix the errors and click "Try Again"
+                    Fix the errors and click &quot;Try Again&quot;
                 </span>
             </div>
         </div>

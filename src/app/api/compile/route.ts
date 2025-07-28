@@ -8,7 +8,7 @@ import crypto from 'crypto';
 const KOTLIN_PROJECT_PATH = path.resolve(process.cwd(), 'compose-compiler');
 const MAIN_KT_PATH = path.join(KOTLIN_PROJECT_PATH, 'composeApp/src/wasmJsMain/kotlin/org/example/project/App.kt')
 const BUILD_OUTPUT_DIR = path.join(KOTLIN_PROJECT_PATH, 'composeApp/build/dist/wasmJs/developmentExecutable');
-const PUBLIC_OUTPUT_DIR = path.join(process.cwd(), 'public/compose-output');
+// const PUBLIC_OUTPUT_DIR = path.join(process.cwd(), 'public/compose-output');
 
 // Cleanup builds older than 1 hour
 const cleanupOldBuilds = async () => {

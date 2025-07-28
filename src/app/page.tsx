@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CodeEditor from './components/Editor';
 import Header from './components/Header';
 import ProgressIndicator from './components/ProgressIndicator';
@@ -181,8 +181,8 @@ export default function HomePage() {
                     }, 500);
                 }
             }
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'An unknown error occurred');
         } finally {
             setIsCompiling(false);
         }
