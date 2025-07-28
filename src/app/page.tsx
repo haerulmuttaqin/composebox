@@ -200,9 +200,10 @@ export default function HomePage() {
         <div className="flex flex-col h-screen">
             <Header isCompiling={isCompiling} onRunCode={compileAndRunCode} />
             
+            {/* Desktop Layout (lg and above) */}
             <div
                 ref={containerRef}
-                className={`flex flex-1 ${isResizing ? 'cursor-col-resize select-none' : 'cursor-default select-auto'}`}
+                className={`hidden lg:flex flex-1 ${isResizing ? 'cursor-col-resize select-none' : 'cursor-default select-auto'}`}
             >
                 {/* Editor Panel */}
                 <div 
@@ -236,6 +237,92 @@ export default function HomePage() {
                     />
 
                     <div className="min-h-[400px] text-black p-2.5 overflow-auto">
+                        {error ? (
+                            <ErrorDisplay 
+                                error={error}
+                                errorDetail={errorDetail}
+                                isCompiling={isCompiling}
+                                onTryAgain={compileAndRunCode}
+                            />
+                        ) : iframeError || previewUrl === '' ? (
+                            previewMode === 'mobile' ? (
+                                <MobilePreview
+                                    previewUrl={previewUrl}
+                                    iframeKey={iframeKey}
+                                    isCompiling={isCompiling}
+                                    buildProgress={buildProgress}
+                                    buildStep={buildStep}
+                                    onRunCode={compileAndRunCode}
+                                    onIframeError={handleIframeError}
+                                    onIframeLoad={handleIframeLoad}
+                                />
+                            ) : (
+                                <DesktopPreview
+                                    previewUrl={previewUrl}
+                                    iframeKey={iframeKey}
+                                    isCompiling={isCompiling}
+                                    buildProgress={buildProgress}
+                                    buildStep={buildStep}
+                                    onRunCode={compileAndRunCode}
+                                    onIframeError={handleIframeError}
+                                    onIframeLoad={handleIframeLoad}
+                                />
+                            )
+                        ) : previewMode === 'mobile' ? (
+                            <MobilePreview
+                                previewUrl={previewUrl}
+                                iframeKey={iframeKey}
+                                isCompiling={isCompiling}
+                                buildProgress={buildProgress}
+                                buildStep={buildStep}
+                                onRunCode={compileAndRunCode}
+                                onIframeError={handleIframeError}
+                                onIframeLoad={handleIframeLoad}
+                            />
+                        ) : (
+                            <DesktopPreview
+                                previewUrl={previewUrl}
+                                iframeKey={iframeKey}
+                                isCompiling={isCompiling}
+                                buildProgress={buildProgress}
+                                buildStep={buildStep}
+                                onRunCode={compileAndRunCode}
+                                onIframeError={handleIframeError}
+                                onIframeLoad={handleIframeLoad}
+                            />
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Layout (below lg) */}
+            <div className="lg:hidden flex flex-col flex-1">
+                {/* Editor Panel */}
+                <div className="flex flex-col border-b border-border-color" style={{ height: '60%' }}>
+                    <div className="relative flex-1 flex flex-col min-h-0">
+                        <CodeEditor code={code} onChange={handleCodeChange} />
+                        <ProgressIndicator 
+                            isCompiling={isCompiling}
+                            buildProgress={buildProgress}
+                            buildStep={buildStep}
+                        />
+                    </div>
+                    {error && (
+                        <div className="text-red-500 m-2.5">
+                            Error: {error}
+                            {errorDetail && <div className="text-xs text-red-200 mt-1">Detail: {errorDetail}</div>}
+                        </div>
+                    )}
+                </div>
+
+                {/* Preview Panel */}
+                <div className="flex-1 p-3 bg-zinc-800 text-white overflow-auto">
+                    <PreviewModeSelector 
+                        previewMode={previewMode} 
+                        onModeChange={setPreviewMode} 
+                    />
+
+                    <div className="min-h-[300px] text-black p-2 overflow-auto">
                         {error ? (
                             <ErrorDisplay 
                                 error={error}

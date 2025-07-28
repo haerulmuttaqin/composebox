@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ isCompiling, onRunCode }) => {
     };
 
     const handleGithub = () => {
-        window.open('https://github.com/compose-box', '_blank');
+        window.open('https://github.com/haerulmuttaqin/composebox', '_blank');
         setShowMenu(false);
     };
 
@@ -56,16 +56,19 @@ const Header: React.FC<HeaderProps> = ({ isCompiling, onRunCode }) => {
 
     return (
         <header className="px-5 py-2.5 border-b border-border-color bg-zinc-800 text-white flex justify-between items-center">
-            <h1><b>ComposeBox</b> (Playground)</h1>
+            <div className="flex items-center gap-2">
+                <img src="/composebox-logo.svg" alt="ComposeBox Logo" width="24" height="24" className="text-blue-400" />
+                <h1><b>ComposeBox</b> (Playground)</h1>
+            </div>
             
             <div className="flex items-center gap-3">
                 <button
                     onClick={onRunCode}
                     disabled={isCompiling}
-                    className={`flex items-center gap-1.5 rounded-full pl-2 pr-4 py-[2px] font-semibold text-[15px] transition-colors duration-200 outline-none ${
+                    className={`flex items-center gap-1.5 border-1 border-zinc-700 rounded-full pl-2 pr-4 py-[2px] font-semibold text-[15px] transition-colors duration-200 outline-none ${
                         isCompiling 
-                            ? 'bg-gray-400 text-gray-500 cursor-not-allowed' 
-                            : 'bg-white text-gray-800 cursor-pointer shadow-sm hover:bg-gray-50'
+                            ? 'bg-zinc-700 text-gray-500 cursor-not-allowed' 
+                            : 'bg-zinc-800 text-white cursor-pointer shadow-sm hover:bg-zinc-700'
                     }`}
                     title="Run Code (Ctrl+S / Cmd+S)"
                 >
@@ -173,7 +176,7 @@ const Header: React.FC<HeaderProps> = ({ isCompiling, onRunCode }) => {
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" fill="none" />
                                 </svg>
-                                Feedback
+                                Feedback/Issues
                             </button>
                         </div>
                     )}
