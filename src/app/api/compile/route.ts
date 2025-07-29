@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { spawn } from 'child_process';
-import { writeFile } from 'fs/promises';
+import {NextRequest, NextResponse} from 'next/server';
+import {spawn} from 'child_process';
+import {writeFile} from 'fs/promises';
 import fs from 'fs-extra';
 import path from 'path';
 import crypto from 'crypto';
 
+const platform = process.platform;
 const KOTLIN_PROJECT_PATH = path.resolve(process.cwd(), 'compose-compiler');
 const MAIN_KT_PATH = path.join(KOTLIN_PROJECT_PATH, 'composeApp/src/wasmJsMain/kotlin/org/example/project/App.kt')
 const BUILD_OUTPUT_DIR = path.join(KOTLIN_PROJECT_PATH, 'composeApp/build/dist/wasmJs/developmentExecutable');
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const code = body.code;
         if (!code || typeof code !== 'string') {
-            return NextResponse.json({ error: 'No code provided' }, { status: 400 });
+            return NextResponse.json({error: 'No code provided'}, {status: 400});
         }
 
         // Get or generate session ID
@@ -41,6 +42,7 @@ export async function POST(req: NextRequest) {
         if (!sessionId) {
             sessionId = crypto.randomBytes(8).toString('hex');
         }
+        console.log('KOTLIN_PROJECT_PATH:', KOTLIN_PROJECT_PATH);
         console.log('API received session ID:', sessionId);
         const sessionOutputDir = path.join(process.cwd(), 'public', 'compose-output', sessionId);
 
@@ -50,31 +52,40 @@ export async function POST(req: NextRequest) {
         // 2. Build
         const start = Date.now();
         const buildResult = await new Promise<{ success: boolean; error?: string }>((resolve) => {
-            const build = spawn('./gradlew', ['wasmJsBrowserDevelopmentExecutable', '--no-configuration-cache'], {
-                cwd: KOTLIN_PROJECT_PATH,
-                timeout: 60000,
-                shell: true,
-                env: process.env,
-            });
-            let stderr = '';
-            build.stdout.on('data', (data) => process.stdout.write(data));
-            build.stderr.on('data', (data) => {
-                process.stderr.write(data);
-                stderr += data.toString();
-            });
-            build.on('close', (code) => {
-                const end = Date.now();
-                console.log('Build time:', (end - start) / 1000, 's');
-                if (code === 0) {
-                    resolve({ success: true });
-                } else {
-                    resolve({ success: false, error: stderr });
+            try {
+                let gradleCommand = "./gradlew"
+                if (platform === 'win32') {
+                    gradleCommand = "gradlew"
                 }
-            });
+                const build = spawn(gradleCommand, ['wasmJsBrowserDevelopmentExecutable', '--no-configuration-cache'], {
+                    cwd: KOTLIN_PROJECT_PATH,
+                    timeout: 60000,
+                    shell: true,
+                    env: process.env,
+                });
+
+                let stderr = '';
+                build.stdout.on('data', (data) => process.stdout.write(data));
+                build.stderr.on('data', (data) => {
+                    process.stderr.write(data);
+                    stderr += data.toString();
+                });
+                build.on('close', (code) => {
+                    const end = Date.now();
+                    console.log('Build time:', (end - start) / 1000, 's');
+                    if (code === 0) {
+                        resolve({success: true});
+                    } else {
+                        resolve({success: false, error: stderr});
+                    }
+                });
+            } catch (e) {
+                console.log(e)
+            }
         });
 
         if (!buildResult.success) {
-            return NextResponse.json({ error: 'Build failed', detail: buildResult.error }, { status: 500 });
+            return NextResponse.json({error: 'Build failed', detail: buildResult.error}, {status: 500});
         }
 
         // 3. Copy ke folder session
@@ -85,7 +96,7 @@ export async function POST(req: NextRequest) {
         await cleanupOldBuilds();
 
         // 5. Return path session dengan cookie
-        const response = NextResponse.json({ url: `/compose-output/${sessionId}/index.html` });
+        const response = NextResponse.json({url: `/compose-output/${sessionId}/index.html`});
 
         // Set session cookie (expires in 24 hours)
         response.cookies.set('compose-session-id', sessionId, {
@@ -97,6 +108,6 @@ export async function POST(req: NextRequest) {
 
         return response;
     } catch (err) {
-        return NextResponse.json({ error: 'Internal server error', detail: String(err) }, { status: 500 });
+        return NextResponse.json({error: 'Internal server error', detail: String(err)}, {status: 500});
     }
 } 
