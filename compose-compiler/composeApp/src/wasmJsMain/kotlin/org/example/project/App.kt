@@ -15,6 +15,11 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.painterResource
 import compose_compiler.composeapp.generated.resources.Res
 import compose_compiler.composeapp.generated.resources.compose_multiplatform
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
 
 @Composable
 fun App() {
@@ -27,8 +32,11 @@ fun App() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Button(onClick = { showContent = !showContent }) {
-                Text("Click me on the button!")
+                Text("Click me test data asda test 123 321 0000000000!")
             }
+            Box(
+                modifier = Modifier.size(100.dp).background(Color.Blue)
+            )
             AnimatedVisibility(showContent) {
                 val greeting = remember { Greeting().greet() }
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {

@@ -37,11 +37,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: 'No code provided'}, {status: 400});
         }
 
-        // Get or generate session ID
-        let sessionId = req.cookies.get('compose-session-id')?.value;
-        if (!sessionId) {
-            sessionId = crypto.randomBytes(8).toString('hex');
-        }
+        // Generate new session ID setiap kali untuk cache busting
+        const sessionId = crypto.randomBytes(8).toString('hex');
         console.log('KOTLIN_PROJECT_PATH:', KOTLIN_PROJECT_PATH);
         console.log('API received session ID:', sessionId);
         const sessionOutputDir = path.join(process.cwd(), 'public', 'compose-output', sessionId);
@@ -49,7 +46,7 @@ export async function POST(req: NextRequest) {
         // 1. Overwrite Main.kt
         await writeFile(MAIN_KT_PATH, code, 'utf-8');
 
-        // 2. Build
+        // 2. Build dengan cache busting
         const start = Date.now();
         const buildResult = await new Promise<{ success: boolean; error?: string }>((resolve) => {
             try {
@@ -57,7 +54,7 @@ export async function POST(req: NextRequest) {
                 if (platform === 'win32') {
                     gradleCommand = "gradlew"
                 }
-                const build = spawn(gradleCommand, ['wasmJsBrowserDevelopmentExecutable', '--no-configuration-cache'], {
+                const build = spawn(gradleCommand, ['wasmJsBrowserDevelopmentExecutable'], {
                     cwd: KOTLIN_PROJECT_PATH,
                     timeout: 60000,
                     shell: true,
@@ -88,23 +85,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: 'Build failed', detail: buildResult.error}, {status: 500});
         }
 
-        // 3. Copy ke folder session
+        // 3. Copy ke folder session dengan cache busting
         await fs.ensureDir(sessionOutputDir);
+        
+        // Generate unique hash dari code untuk cache busting
+        const codeHash = crypto.createHash('md5').update(code).digest('hex').substring(0, 8);
+        
+        // Clean existing files first
+        await fs.emptyDir(sessionOutputDir);
         await fs.copy(BUILD_OUTPUT_DIR, sessionOutputDir);
 
         // 4. Cleanup old builds (optional)
         await cleanupOldBuilds();
 
-        // 5. Return path session dengan cookie
-        const response = NextResponse.json({url: `/compose-output/${sessionId}/index.html`});
-
-        // Set session cookie (expires in 24 hours)
-        response.cookies.set('compose-session-id', sessionId, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60, // 24 hours
-        });
+        // 5. Return path session dengan cache busting
+        const timestamp = Date.now();
+        const response = NextResponse.json({url: `/compose-output/${sessionId}/index.html?t=${timestamp}&h=${codeHash}`});
 
         return response;
     } catch (err) {
