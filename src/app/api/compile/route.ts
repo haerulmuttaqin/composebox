@@ -9,11 +9,11 @@ const platform = process.platform;
 const KOTLIN_PROJECT_PATH = path.resolve(process.cwd(), 'compose-compiler');
 const MAIN_KT_PATH = path.join(KOTLIN_PROJECT_PATH, 'composeApp/src/wasmJsMain/kotlin/org/example/project/App.kt')
 const BUILD_OUTPUT_DIR = path.join(KOTLIN_PROJECT_PATH, 'composeApp/build/dist/wasmJs/developmentExecutable');
-// const PUBLIC_OUTPUT_DIR = path.join(process.cwd(), 'public/compose-output');
+const OUTPUT_BASE_DIR = path.join(KOTLIN_PROJECT_PATH, 'compose-outputs');
 
 // Cleanup builds older than 1 hour
 const cleanupOldBuilds = async () => {
-    const outputBaseDir = path.join(process.cwd(), 'public', 'compose-output');
+    const outputBaseDir = OUTPUT_BASE_DIR;
     const dirs = await fs.readdir(outputBaseDir);
 
     for (const dir of dirs) {
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         const sessionId = crypto.randomBytes(8).toString('hex');
         console.log('KOTLIN_PROJECT_PATH:', KOTLIN_PROJECT_PATH);
         console.log('API received session ID:', sessionId);
-        const sessionOutputDir = path.join(process.cwd(), 'public', 'compose-output', sessionId);
+        const sessionOutputDir = path.join(OUTPUT_BASE_DIR, sessionId);
 
         // 1. Overwrite Main.kt
         await writeFile(MAIN_KT_PATH, code, 'utf-8');
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
 
         // 5. Return path session dengan cache busting
         const timestamp = Date.now();
-        const response = NextResponse.json({url: `/compose-output/${sessionId}/index.html?t=${timestamp}&h=${codeHash}`});
+        const response = NextResponse.json({url: `/api/compose-html/${sessionId}/index.html?t=${timestamp}&h=${codeHash}`});
 
         return response;
     } catch (err) {

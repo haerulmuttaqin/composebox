@@ -44,3 +44,4 @@ next-env.d.ts
 # compiler
 public/compose-output/*
 compose-compiler/composeApp/build/*
+compose-compiler/compose-outputs/*
