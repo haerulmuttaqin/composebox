@@ -1,18 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { spawn } from 'child_process';
-import { writeFile } from 'fs/promises';
+import {NextRequest, NextResponse} from 'next/server';
+import {spawn} from 'child_process';
+import {writeFile} from 'fs/promises';
 import fs from 'fs-extra';
 import path from 'path';
 import crypto from 'crypto';
 
+const platform = process.platform;
 const KOTLIN_PROJECT_PATH = path.resolve(process.cwd(), 'compose-compiler');
 const MAIN_KT_PATH = path.join(KOTLIN_PROJECT_PATH, 'composeApp/src/wasmJsMain/kotlin/org/example/project/App.kt')
 const BUILD_OUTPUT_DIR = path.join(KOTLIN_PROJECT_PATH, 'composeApp/build/dist/wasmJs/developmentExecutable');
-// const PUBLIC_OUTPUT_DIR = path.join(process.cwd(), 'public/compose-output');
+const OUTPUT_BASE_DIR = path.join(KOTLIN_PROJECT_PATH, 'compose-outputs');
 
 // Cleanup builds older than 1 hour
 const cleanupOldBuilds = async () => {
-    const outputBaseDir = path.join(process.cwd(), 'public', 'compose-output');
+    const outputBaseDir = OUTPUT_BASE_DIR;
     const dirs = await fs.readdir(outputBaseDir);
 
     for (const dir of dirs) {
@@ -33,70 +34,76 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const code = body.code;
         if (!code || typeof code !== 'string') {
-            return NextResponse.json({ error: 'No code provided' }, { status: 400 });
+            return NextResponse.json({error: 'No code provided'}, {status: 400});
         }
 
-        // Get or generate session ID
-        let sessionId = req.cookies.get('compose-session-id')?.value;
-        if (!sessionId) {
-            sessionId = crypto.randomBytes(8).toString('hex');
-        }
+        // Generate new session ID setiap kali untuk cache busting
+        const sessionId = crypto.randomBytes(8).toString('hex');
+        console.log('KOTLIN_PROJECT_PATH:', KOTLIN_PROJECT_PATH);
         console.log('API received session ID:', sessionId);
-        const sessionOutputDir = path.join(process.cwd(), 'public', 'compose-output', sessionId);
+        const sessionOutputDir = path.join(OUTPUT_BASE_DIR, sessionId);
 
         // 1. Overwrite Main.kt
         await writeFile(MAIN_KT_PATH, code, 'utf-8');
 
-        // 2. Build
+        // 2. Build dengan cache busting
         const start = Date.now();
         const buildResult = await new Promise<{ success: boolean; error?: string }>((resolve) => {
-            const build = spawn('./gradlew', ['wasmJsBrowserDevelopmentExecutable', '--no-configuration-cache'], {
-                cwd: KOTLIN_PROJECT_PATH,
-                timeout: 60000,
-                shell: true,
-                env: process.env,
-            });
-            let stderr = '';
-            build.stdout.on('data', (data) => process.stdout.write(data));
-            build.stderr.on('data', (data) => {
-                process.stderr.write(data);
-                stderr += data.toString();
-            });
-            build.on('close', (code) => {
-                const end = Date.now();
-                console.log('Build time:', (end - start) / 1000, 's');
-                if (code === 0) {
-                    resolve({ success: true });
-                } else {
-                    resolve({ success: false, error: stderr });
+            try {
+                let gradleCommand = "./gradlew"
+                if (platform === 'win32') {
+                    gradleCommand = "gradlew"
                 }
-            });
+                const build = spawn(gradleCommand, ['wasmJsBrowserDevelopmentExecutable'], {
+                    cwd: KOTLIN_PROJECT_PATH,
+                    timeout: 60000,
+                    shell: true,
+                    env: process.env,
+                });
+
+                let stderr = '';
+                build.stdout.on('data', (data) => process.stdout.write(data));
+                build.stderr.on('data', (data) => {
+                    process.stderr.write(data);
+                    stderr += data.toString();
+                });
+                build.on('close', (code) => {
+                    const end = Date.now();
+                    console.log('Build time:', (end - start) / 1000, 's');
+                    if (code === 0) {
+                        resolve({success: true});
+                    } else {
+                        resolve({success: false, error: stderr});
+                    }
+                });
+            } catch (e) {
+                console.log(e)
+            }
         });
 
         if (!buildResult.success) {
-            return NextResponse.json({ error: 'Build failed', detail: buildResult.error }, { status: 500 });
+            return NextResponse.json({error: 'Build failed', detail: buildResult.error}, {status: 500});
         }
 
-        // 3. Copy ke folder session
+        // 3. Copy ke folder session dengan cache busting
         await fs.ensureDir(sessionOutputDir);
+        
+        // Generate unique hash dari code untuk cache busting
+        const codeHash = crypto.createHash('md5').update(code).digest('hex').substring(0, 8);
+        
+        // Clean existing files first
+        await fs.emptyDir(sessionOutputDir);
         await fs.copy(BUILD_OUTPUT_DIR, sessionOutputDir);
 
         // 4. Cleanup old builds (optional)
         await cleanupOldBuilds();
 
-        // 5. Return path session dengan cookie
-        const response = NextResponse.json({ url: `/compose-output/${sessionId}/index.html` });
-
-        // Set session cookie (expires in 24 hours)
-        response.cookies.set('compose-session-id', sessionId, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60, // 24 hours
-        });
+        // 5. Return path session dengan cache busting
+        const timestamp = Date.now();
+        const response = NextResponse.json({url: `/api/compose-html/${sessionId}/index.html?t=${timestamp}&h=${codeHash}`});
 
         return response;
     } catch (err) {
-        return NextResponse.json({ error: 'Internal server error', detail: String(err) }, { status: 500 });
+        return NextResponse.json({error: 'Internal server error', detail: String(err)}, {status: 500});
     }
 } 

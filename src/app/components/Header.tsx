@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import Image from 'next/image';
 import React, { useState, useRef, useEffect } from 'react';
 
 interface HeaderProps {
@@ -57,8 +59,10 @@ const Header: React.FC<HeaderProps> = ({ isCompiling, onRunCode }) => {
     return (
         <header className="px-5 py-2.5 border-b border-border-color bg-zinc-800 text-white flex justify-between items-center">
             <div className="flex items-center gap-2">
-                <img src="/composebox-logo.svg" alt="ComposeBox Logo" width="24" height="24" className="text-blue-400" />
-                <h1><b>ComposeBox</b> (Playground)</h1>
+                <Link href="/" className="flex items-center gap-2">
+                    <Image src="/composebox-logo.svg" alt="ComposeBox Logo" width={24} height={24} className="text-blue-400" />
+                    <h1 className="text-white"><b>ComposeBox</b> (Playground)</h1>
+                </Link>
             </div>
             
             <div className="flex items-center gap-3">
