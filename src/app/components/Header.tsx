@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React, {useEffect, useRef, useState} from 'react';
+import {getMainUrl, getPlaygroundUrl} from "@/app/utils/utils";
 
 // 1. Props 'isCompiling' dan 'onRunCode' dibuat opsional
 interface HeaderProps {
@@ -51,29 +52,24 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
     };
 
     return (
-        // PERUBAHAN DI SINI: Menambahkan kelas sticky, top-0, dan z-40
         <header className="sticky top-0 z-40 py-2.5 border-b border-border-color bg-zinc-800 text-white">
-            {/* Container dinamis yang menyesuaikan layout berdasarkan pageType */}
             <div className={
                 pageType === 'landing'
                     ? 'container max-w-7xl sm:px-6 lg:px-8 mx-auto px-5 flex justify-between items-center'
                     : 'px-5 flex justify-between items-center'
             }>
-                {/* Sisi Kiri: Logo dan Judul */}
                 <div className="flex items-center gap-2">
-                    <Link href="/" className="flex items-center gap-2">
-                        <Image src="/composebox-logo.svg" alt="ComposeBox Logo" width={24} height={24}/>
+                    <Link href={getMainUrl()} className="flex items-center gap-2">
+                        <Image src={getMainUrl() + "/composebox-logo.svg"} alt="ComposeBox Logo" width={24}
+                               height={24}/>
                         <h1 className="text-white">
                             <b>ComposeBox</b>
-                            {/* 3. Judul dinamis */}
                             {pageType === 'playground' && ' (Playground)'}
                         </h1>
                     </Link>
                 </div>
 
-                {/* Sisi Kanan: Tombol Aksi dan Menu */}
                 <div className="flex items-center gap-3">
-                    {/* 4. Tombol Aksi Dinamis */}
                     {pageType === 'playground' && onRunCode && (
                         <button
                             onClick={onRunCode}
@@ -110,7 +106,7 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
                     )}
 
                     {pageType === 'landing' && (
-                        <Link href="/playground" passHref
+                        <Link href={getPlaygroundUrl()} passHref
                               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-[15px] px-4 py-1.5 rounded-full transition-colors duration-200">
                             Try Playground
                         </Link>
@@ -133,8 +129,7 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
                         {showMenu && (
                             <div
                                 className="absolute top-full right-0 mt-1 bg-zinc-800 border border-border-color rounded-md shadow-lg z-50 min-w-48 py-1">
-                                {/* 5. Menggunakan Link untuk navigasi ke halaman About */}
-                                <Link href="/about" passHref>
+                                <Link href={getMainUrl() + "/about"} passHref>
                                     <div onClick={() => setShowMenu(false)}
                                          className="w-full px-4 py-2 bg-transparent border-none text-white cursor-pointer text-left text-sm flex items-center gap-3 hover:bg-white/10 transition-colors duration-200">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">

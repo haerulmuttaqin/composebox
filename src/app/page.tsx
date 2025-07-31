@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import {useRouter} from "next/navigation";
+import {getPlaygroundUrl} from "@/app/utils/utils";
 
 
 export default function HomePage() {
@@ -42,7 +43,7 @@ export default function HomePage() {
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <Link
-                                    href="/playground"
+                                    href={getPlaygroundUrl()}
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold text-md transition-colors duration-200 shadow-lg hover:shadow-xl"
                                 >
                                     Try Playground
@@ -68,7 +69,7 @@ export default function HomePage() {
                         className="relative cursor-pointer w-full overflow-hidden rounded-lg shadow-xl aspect-video">
                         <video
                             style={{marginBottom: "-40px"}}
-                            className="top-0 left-0 w-full h-full object-cover"
+                            className="top-0 left-0 w-full h-full object-cover object-top"
                             autoPlay
                             loop
                             muted
@@ -170,7 +171,7 @@ export default function HomePage() {
                             Start exploring Jetpack Compose Multiplatform now
                         </p>
                         <Link
-                            href="/playground"
+                            href={getPlaygroundUrl()}
                             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg hover:shadow-xl inline-block"
                         >
                             Get Started

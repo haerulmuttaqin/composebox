@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import {getPlaygroundUrl} from "@/app/utils/utils";
+
 
 export default function AboutPage() {
     return (
@@ -216,7 +218,7 @@ export default function AboutPage() {
                                     GitHub
                                 </a>
                                 <Link
-                                    href="/playground"
+                                    href={getPlaygroundUrl()}
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
                                 >
                                     Try Now
