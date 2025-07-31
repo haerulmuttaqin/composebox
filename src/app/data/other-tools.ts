@@ -15,5 +15,17 @@ export const OtherTools: OtherTool[] = [
     {
         name: "MediumWebID",
         url: "https://medium.web.id/"
+    },
+    {
+        name: "MediumWebID (Extension)",
+        url: "https://github.com/haerulmuttaqin/medium-web-id-extension/releases"
+    },
+    {
+        name: "CCTV Indonesia",
+        url: "https://cctv.hae.my.id/"
+    },
+    {
+        name: "HLS Video Thumbnail",
+        url: "https://vid-thumb.hae.my.id/"
     }
 ]
