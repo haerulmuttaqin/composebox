@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
                             <b>ComposeBox</b>
                             {pageType === 'playground' && (<>
                                 <span>(Playground)</span><span style={{fontSize: "8px"}}
-                                className="absolute ml-1 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-0.5 rounded-full transform">
+                                                               className="absolute ml-1 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-0.5 rounded-full transform">
                                         BETA
                                     </span>
                             </>)}
@@ -112,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
 
                     {pageType === 'landing' && (
                         <Link href={getPlaygroundUrl()} passHref
-                              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-[15px] px-4 py-1.5 rounded-full transition-colors duration-200">
+                              className="bg-white hover:bg-blue-500 text-blue-500 border-1 border-blue-500 font-semibold text-[15px] px-4 py-1.5 rounded-full transition-colors duration-200">
                             Try Playground
                         </Link>
                     )}
