@@ -64,7 +64,12 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
                                height={24}/>
                         <h1 className="text-white">
                             <b>ComposeBox</b>
-                            {pageType === 'playground' && ' (Playground)'}
+                            {pageType === 'playground' && (<>
+                                <span>(Playground)</span><span style={{fontSize: "8px"}}
+                                className="absolute ml-1 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-0.5 rounded-full transform">
+                                        BETA
+                                    </span>
+                            </>)}
                         </h1>
                     </Link>
                 </div>
