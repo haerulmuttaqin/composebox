@@ -24,7 +24,7 @@ export default function HomePage() {
                         <div className="text-center">
                             {/* Logo */}
                             <div className="mb-8">
-                                <div className="inline-flex items-center justify-center">
+                                <div className="relative inline-flex items-center justify-center">
                                     <Image
                                         src="/composebox-logo.svg"
                                         alt="ComposeBox Logo"
@@ -32,6 +32,9 @@ export default function HomePage() {
                                         height={142}
                                         className="text-blue-400"
                                     />
+                                    <span className="absolute top-3 -right-1 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-0.5 rounded-full transform">
+                                        BETA
+                                    </span>
                                 </div>
                             </div>
                             <h1 className="text-3xl md:text-4xl text-zinc-300 font-bold mb-8 max-w-3xl mx-auto">
