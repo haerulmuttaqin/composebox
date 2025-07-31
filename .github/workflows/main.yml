@@ -33,6 +33,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /var/www/composebox
+          sudo git stash
           sudo git pull origin main
           sudo npm ci --production
           sudo npm run build
