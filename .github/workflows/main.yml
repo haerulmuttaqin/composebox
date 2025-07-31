@@ -19,7 +19,7 @@ jobs:
         node-version: '24'
 
     - name: Install dependencies
-      run: npm ci
+      run: sudo npm ci
 
     - name: Build Next.js application
       run: sudo npm run build
