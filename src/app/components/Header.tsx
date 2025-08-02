@@ -58,28 +58,30 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
                     ? 'container max-w-7xl sm:px-6 lg:px-8 mx-auto px-5 flex justify-between items-center'
                     : 'px-5 flex justify-between items-center'
             }>
-                <div className="flex items-center gap-2">
-                    <Link href={getMainUrl()} className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                    <Link href={getMainUrl()} className="flex items-center gap-2 min-w-0">
                         <Image src={getMainUrl() + "/composebox-logo.svg"} alt="ComposeBox Logo" width={24}
-                               height={24}/>
-                        <h1 className="text-white">
-                            <b>ComposeBox</b>
-                            {pageType === 'playground' && (<>
-                                <span>(Playground)</span><span style={{fontSize: "8px"}}
-                                                               className="absolute ml-1 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-0.5 rounded-full transform">
-                                        BETA
-                                    </span>
-                            </>)}
+                               height={24} className="flex-shrink-0"/>
+                        <h1 className="text-white text-sm sm:text-base min-w-0">
+                            <b className="whitespace-nowrap">ComposeBox</b>
+                            {pageType === 'playground' && (
+                                <span className="hidden sm:inline whitespace-nowrap"> (Playground)</span>
+                            )}
+                            {pageType === 'playground' && (
+                                <span className="inline ml-1 bg-yellow-400 text-yellow-900 text-xs font-bold px-1.5 py-0.5 rounded-full">
+                                    BETA
+                                </span>
+                            )}
                         </h1>
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     {pageType === 'playground' && onRunCode && (
                         <button
                             onClick={onRunCode}
                             disabled={isCompiling}
-                            className={`flex items-center gap-1.5 border-1 border-zinc-700 rounded-full pl-2 pr-4 py-[2px] font-semibold text-[15px] transition-colors duration-200 outline-none ${
+                            className={`flex items-center gap-1.5 border-1 border-zinc-700 rounded-full pl-2 pr-2 sm:pr-4 py-[2px] font-semibold text-xs sm:text-[15px] transition-colors duration-200 outline-none ${
                                 isCompiling
                                     ? 'bg-zinc-700 text-gray-500 cursor-not-allowed'
                                     : 'bg-zinc-800 text-white cursor-pointer shadow-sm hover:bg-zinc-700'
@@ -88,23 +90,19 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
                         >
                             {isCompiling ? (
                                 <span className="flex items-center">
-                                    <svg width="2" height="32" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg"><path
-                                        d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z"
-                                        fill="#4CAF50"/></svg>
                                     <span
-                                        className="w-4 h-4 border-2 border-gray-400 border-t-green-500 rounded-full animate-spin mr-1.5"/>
-                                    Compiling...
+                                        className="w-3 h-3 my-2 sm:w-4 sm:h-4 border-2 border-gray-400 border-t-green-500 rounded-full animate-spin mr-1 sm:mr-1.5"/>
+                                    <span className="hidden sm:inline">Compiling...</span>
                                 </span>
                             ) : (
                                 <>
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                                    <svg width="16" height="16" className="sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none"
                                          xmlns="http://www.w3.org/2000/svg">
                                         <path
                                             d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z"
                                             fill="#4CAF50"/>
                                     </svg>
-                                    Run Code
+                                    <span className="hidden sm:inline">Run Code</span>
                                 </>
                             )}
                         </button>
@@ -112,8 +110,9 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
 
                     {pageType === 'landing' && (
                         <Link href={getPlaygroundUrl()} passHref
-                              className="bg-white hover:bg-blue-500 text-blue-500 hover:text-white border-1 border-blue-500 font-semibold text-[15px] px-4 py-1.5 rounded-full transition-colors duration-200">
-                            Try Playground
+                              className="bg-white hover:bg-blue-500 text-blue-500 hover:text-white border-1 border-blue-500 font-semibold text-xs sm:text-[15px] px-2 sm:px-4 py-1.5 rounded-full transition-colors duration-200 whitespace-nowrap">
+                            <span className="hidden sm:inline">Try Playground</span>
+                            <span className="sm:hidden">Try</span>
                         </Link>
                     )}
 
@@ -121,10 +120,10 @@ const Header: React.FC<HeaderProps> = ({pageType = 'playground', isCompiling, on
                     <div className="relative" ref={menuRef}>
                         <button
                             onClick={() => setShowMenu(!showMenu)}
-                            className="bg-transparent border-1 border-zinc-700 text-white cursor-pointer p-2 rounded-md flex items-center justify-center transition-colors duration-200 hover:bg-white/10"
+                            className="bg-transparent border-1 border-zinc-700 text-white cursor-pointer p-1.5 sm:p-2 rounded-md flex items-center justify-center transition-colors duration-200 hover:bg-white/10"
                             title="More options"
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <svg width="16" height="16" className="sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none">
                                 <circle cx="12" cy="6" r="1" fill="currentColor"/>
                                 <circle cx="12" cy="12" r="1" fill="currentColor"/>
                                 <circle cx="12" cy="18" r="1" fill="currentColor"/>
