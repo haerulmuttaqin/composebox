@@ -128,7 +128,7 @@ const Footer: React.FC = () => {
             {/* Bottom Bar */}
             <div className="border-t border-zinc-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center">
                 <p className="text-zinc-400 text-xs sm:text-sm">
-                    © {new Date().getFullYear()} ComposeBox. Built with ❤️ using Next.js & Kotlin Multiplatform.
+                    © {new Date().getFullYear()} ComposeBox | <a href="https://hae.my.id" target="_blank" rel="noopener noreferrer">HÆ.</a>
                 </p>
             </div>
         </div>

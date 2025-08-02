@@ -5,22 +5,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import {useRouter} from "next/navigation";
-import {getPlaygroundUrl} from "@/app/utils/utils";
+import { useRouter } from "next/navigation";
+import { getPlaygroundUrl } from "@/app/utils/utils";
 
 
 export default function HomePage() {
     const router = useRouter()
     const handleOpenPlayground = () => {
-        router.push('/playground')
+        router.push(getPlaygroundUrl())
     }
     return (
         <div className="min-h-screen bg-zinc-800 flex flex-col">
-            <Header pageType="landing"/>
+            <Header pageType="landing" />
             <main className="flex-grow">
                 {/* Hero Section */}
                 <section className="relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-800">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8" style={{paddingBottom: "200px"}}>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8" style={{ paddingBottom: "200px" }}>
                         <div className="text-center">
                             {/* Logo */}
                             <div className="mb-6 sm:mb-8">
@@ -64,14 +64,14 @@ export default function HomePage() {
 
                 {/* Video Section */}
                 <div
-                    style={{marginTop: "-150px"}}
+                    style={{ marginTop: "-150px" }}
                     className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div
                         onClick={handleOpenPlayground}
-                        style={{border: "solid 5px #fefefe21"}}
+                        style={{ border: "solid 5px #fefefe21" }}
                         className="relative cursor-pointer w-full overflow-hidden rounded-lg shadow-xl aspect-video">
                         <video
-                            style={{marginBottom: "-40px"}}
+                            style={{ marginBottom: "-40px" }}
                             className="top-0 left-0 w-full h-full object-cover object-top"
                             autoPlay
                             loop
@@ -79,7 +79,7 @@ export default function HomePage() {
                             playsInline
                             poster="/video-landing.webp"
                         >
-                            <source src="/video-landing.webm" type="video/webm"/>
+                            <source src="/video-landing.webm" type="video/webm" />
                             Your browser does not support the video tag.
                         </video>
                     </div>
@@ -102,9 +102,9 @@ export default function HomePage() {
                                 <div
                                     className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                                     <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
+                                        viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                            d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
                                 <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">No Installation</h3>
@@ -115,11 +115,11 @@ export default function HomePage() {
                                 <div
                                     className="w-12 h-12 sm:w-16 sm:h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                                     <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
+                                        viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
                                 </div>
                                 <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Real-time Preview</h3>
@@ -135,9 +135,9 @@ export default function HomePage() {
                                     <div
                                         className="w-12 h-12 sm:w-16 sm:h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                                         <svg className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" fill="none" stroke="currentColor"
-                                             viewBox="0 0 24 24">
+                                            viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+                                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                                         </svg>
                                     </div>
                                     <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Easy Sharing</h3>
@@ -149,9 +149,9 @@ export default function HomePage() {
                                 <div
                                     className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                                     <svg className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
+                                        viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                                 <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Multiplatform</h3>
@@ -165,7 +165,7 @@ export default function HomePage() {
                 <section className="py-12 sm:py-16 md:py-20 bg-zinc-900">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 px-2">
-                            Ready to Start Coding?
+                            Ready to Experiment?
                         </h2>
                         <p className="text-base sm:text-lg text-zinc-300 mb-8 px-4">
                             Join thousands of developers exploring Jetpack Compose Multiplatform
@@ -181,7 +181,7 @@ export default function HomePage() {
             </main>
 
             {/* Footer */}
-            <Footer/>
+            <Footer />
         </div>
     );
 }
